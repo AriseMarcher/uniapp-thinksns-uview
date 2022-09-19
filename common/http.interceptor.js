@@ -31,8 +31,17 @@ const install = (Vue, vm) => {
 	
 	// 响应拦截，判断状态码是否通过
 	Vue.prototype.$u.http.interceptor.response = (res) => {
-		console.log(res)
-		return res
+		if (res.code == 401) {
+			// 如果返回false，则会调用Promise的reject回调，
+			// 并将进入this.$u.post(url).then().catch(res=>{})的catch回调中，res为服务端的返回值
+			vm.$u.toast("当前接口访问失败");
+			return false;
+		} else {
+			// res为服务端返回值，可能有code，result等字段
+			// 这里对res.result进行返回，将会在this.$u.post(url).then(res => {})的then回调中的res的到
+			// 如果配置了originalData为true，请留意这里的返回值
+			return res;
+		}
 	}
 }
 

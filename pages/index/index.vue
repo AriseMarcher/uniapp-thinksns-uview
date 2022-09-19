@@ -26,13 +26,59 @@
 					</view>
 				</view>
 			</view>
+			
+			<!-- Tab 选项卡 -->
+			<view class="tabs-box">
+				<view class="one-nav" :class="currentSwiperIndex === 0 ? 'nav-actived' : '' " @tap="swiperChange(0)">推荐</view>
+				<view class="one-nav" :class="currentSwiperIndex === 1 ? 'nav-actived' : '' " @tap="swiperChange(1)">资讯</view>
+			</view>
 		</view>
-
-		<!-- Tab 选项卡 -->
-		<view class="tabs-box">
-			<view class="one-nav nav-actived">推荐</view>
-			<view class="one-nav">资讯</view>
-		</view>
+		
+		<swiper class="swiper-box" style="height: 1000upx" :current="currentSwiperIndex">
+			<swiper-item class="swiper-item sns-now">
+				<view class="feeds-box">
+					<view class="feed-one" v-for="(item, index) in feedsList" :key="index">
+						<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+							<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
+							<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+							<view class="feed-info">
+								<view class="iview">
+									<image class="avatar" :src=" item.avatar" />
+									<text class="name u-line-1">{{ item.name }}</text>
+								</view>
+								<view class="iview">
+									<view class="ilike" @tap.stop="clickLove(item)">
+										<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+										<image v-else src="@/static/love.png" class="micon" />
+										<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+									</view>
+								</view>
+							</view>
+						</navigator>
+					</view>
+				</view>
+			</swiper-item>
+			<swiper-item class="swiper-item sns-news">
+				<view v-for="(item, index) in newsList" :key="index">
+					<navigator class="one-new" open-type="navigate" :url=" '/subpages/newinfo/newinfo?id=' + item.id">
+						<view class="left">
+							<view class="title u-line-2">{{item.title}}</view>
+							<view class="uinfo">
+								<view class="iview">
+									<view class="utime">
+										<text class="name">{{ item.author }}</text>
+									</view>
+								</view>
+								<text class="uptime">{{ item.created_at | timeFormate }}发布</text>
+							</view>
+						</view>
+						<view class="right">
+							<image class="pic" mode="aspectFill" :src="item.cover" />
+						</view>
+					</navigator>
+				</view>
+			</swiper-item>
+		</swiper>
 	</view>
 </template>
 
@@ -40,14 +86,25 @@
 	export default {
 		data() {
 			return {
-				title: 'Hello',
-				swiperList: []
+				swiperList: [], // 轮播图广告列表信息
+				currentSwiperIndex: 0, // 当前 推荐 咨询 滑动位置
+				feedsList: [], // 动态列表数据
+				newsList: [] // 资讯列表数据
+			}
+		},
+		filters: {
+			timeFormate(timeDate) {
+				// let Time = new Date(timeDate);
+				// let timestemp = Time.getTime();
+				// let t = timeFrom(timestemp, "yyyy年mm月dd日");
+				// return t;
+				return 'xxx'
 			}
 		},
 		async onLoad() {
-			// console.log(this)
 			this.loadAdvertising()
-			console.log(this.$u.config.v);
+			this.loadFeeds()
+			this.loadNews()
 		},
 		methods: {
 			async loadAdvertising () {
@@ -60,7 +117,42 @@
 				uni.switchTab({
 					url
 				})
-			}
+			},
+			// 推荐、资讯切换方法
+			swiperChange (index) {
+				this.currentSwiperIndex = index
+			},
+			// 获取动态信息
+			async loadFeeds () {
+				let feeds = await this.$u.api.getFeeds()
+				console.log(feeds.data.feeds)
+				this.feedsList = feeds.data.feeds.map(item => {
+					let curCover = ''
+					if (item.images.length) {
+						curCover = this.BaseFileUrl + item.images[0].file
+					} else {
+						curCover = ''
+					}
+					return {
+						cover: curCover,
+						avatar: !!item.user.avatar ? item.user.avatar : '/static/nopic.png',
+						name: item.user.name || '',
+						...item
+					}
+				})
+				console.log(feeds)
+				console.log(this.feedsList)
+			},
+			// 获取资讯信息
+			async loadNews () {
+				let news = await this.$u.api.getNews()
+				this.newsList = news.data.map(item => {
+					return {
+						cover: this.BaseFileUrl + item.image.id
+					}
+				})
+				console.log(this.newsList)
+			},
 		}
 	}
 </script>
