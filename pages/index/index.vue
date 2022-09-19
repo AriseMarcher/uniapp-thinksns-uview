@@ -2,11 +2,9 @@
 	<view class="content">
 		<view class="header-box">
 			<swiper class="swiper" :indicator-dots="false" :autoplay="true" :interval="2500" :duration="500">
-				<swiper-item>
-					<navigator
-					open-type="navigate"
-					:url="'/pages/webview/webview?url=' + encodeURI('http://www.baidu.com')">
-						<view class="swiper-item uni-bg-red">A</view>
+				<swiper-item v-for="(item, index) in swiperList" :key="index">
+					<navigator open-type="navigate" :url="'/pages/webview/webview?url=' + encodeURI(item.data.link)">
+						<image class="banner-swiper-img" :src="item.data.image"></image>
 					</navigator>
 				</swiper-item>
 			</swiper>
@@ -42,13 +40,22 @@
 	export default {
 		data() {
 			return {
-				title: 'Hello'
+				title: 'Hello',
+				swiperList: []
 			}
 		},
-		onLoad() {
-
+		async onLoad() {
+			// console.log(this)
+			this.loadAdvertising()
+			console.log(this.$u.config.v);
 		},
 		methods: {
+			async loadAdvertising () {
+				let data = await this.$u.api.getAdvert()
+				if (data.statusCode === 200) {
+					this.swiperList = data.data
+				}
+			},
 			gotoFeeds (url) {
 				uni.switchTab({
 					url
