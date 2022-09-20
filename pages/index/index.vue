@@ -166,6 +166,23 @@
 				this.navBarShowTag = false
 			}
 		},
+		enablePullDownRefresh () {
+			this.loadAdvertising()
+			if (this.currentSwiperIndex === 0) {
+				this.$ref.waterFall.clear()
+				this.loadFeeds()
+			} else {
+				this.loadNews()
+			}
+		},
+		// 下拉置底请求新的数据
+		onReachBottom () {
+			if (this.currentSwiperIndex === 0) {
+				this.loadFeeds()
+			} else {
+				this.loadNews()
+			}
+		},
 		methods: {
 			async loadAdvertising () {
 				let data = await this.$u.api.getAdvert()
@@ -200,7 +217,7 @@
 			async loadFeeds () {
 				let feeds = await this.$u.api.getFeeds()
 				console.log(feeds.data.feeds)
-				this.feedsList = feeds.data.feeds.map(item => {
+				let feedsList = feeds.data.feeds.map(item => {
 					let curCover = ''
 					if (item.images.length) {
 						curCover = this.BaseFileUrl + item.images[0].file
@@ -214,8 +231,8 @@
 						...item
 					}
 				})
+				this.feedsList = [...this.feedsList, ...feedsList]
 				uni.$on('swiperHeightChange', height => {
-					console.log('触发了' + height)
 					this.swiperSliderFeedsHeight = height
 					this.swiperSliderHeight = height
 				})
@@ -223,14 +240,16 @@
 			// 获取资讯信息
 			async loadNews () {
 				let news = await this.$u.api.getNews()
-				this.newsList = news.data.map(item => {
+				let newsList = news.data.map(item => {
 					return {
 						cover: this.BaseFileUrl + item.image.id,
 						...item
 					}
 				})
+				this.newsList = [...this.newsList, ...newsList]
 				this.swiperSliderNewsHeight = (this.newsList.length * 95 + 100) + 'px'
-				console.log(this.newsList)
+				// TODO 刚开始请求两个会有高度重置
+				this.swiperSliderHeight = this.swiperSliderNewsHeight
 			},
 		}
 	}
