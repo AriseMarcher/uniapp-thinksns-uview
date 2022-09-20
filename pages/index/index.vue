@@ -34,28 +34,59 @@
 			</view>
 		</view>
 		
-		<swiper class="swiper-box" style="height: 1000upx" :current="currentSwiperIndex">
+		<swiper
+			class="swiper-box"
+			:style="'height:' + swiperSliderHeight "
+			:current="currentSwiperIndex"
+			@animationfinish="swiperSlider"
+		>
 			<swiper-item class="swiper-item sns-now">
 				<view class="feeds-box">
-					<view class="feed-one" v-for="(item, index) in feedsList" :key="index">
-						<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
-							<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
-							<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
-							<view class="feed-info">
-								<view class="iview">
-									<image class="avatar" :src=" item.avatar" />
-									<text class="name u-line-1">{{ item.name }}</text>
-								</view>
-								<view class="iview">
-									<view class="ilike" @tap.stop="clickLove(item)">
-										<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
-										<image v-else src="@/static/love.png" class="micon" />
-										<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+					<sns-waterfall v-model="feedsList" ref="waterFall">
+						<template v-slot:left="{leftList}">
+							<view class="feed-one" v-for="(item, index) in leftList" :key="index">
+								<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+									<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
+									<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+									<view class="feed-info">
+										<view class="iview">
+											<image class="avatar" :src=" item.avatar" />
+											<text class="name u-line-1">{{ item.name }}</text>
+										</view>
+										<view class="iview">
+											<view class="ilike" @tap.stop="clickLove(item)">
+												<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+												<image v-else src="@/static/love.png" class="micon" />
+												<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+											</view>
+										</view>
 									</view>
-								</view>
+								</navigator>
 							</view>
-						</navigator>
-					</view>
+						</template>
+						<template v-slot:right="{rightList}">
+							<view class="feed-one" v-for="(item, index) in rightList" :key="index">
+								<navigator open-type="navigate" :url=" '/subpages/feedinfo/feedinfo?id=' + item.id">
+									<image class="feed-img" :src="item.cover" mode="widthFix" :lazy-load="true" />
+									<view class="u-line-2 feed-title" v-if="!!item.feed_content">{{ item.feed_content }}</view>
+									<view class="feed-info">
+										<view class="iview">
+											<image class="avatar" :src=" item.avatar" />
+											<text class="name u-line-1">{{ item.name }}</text>
+										</view>
+										<view class="iview">
+											<view class="ilike" @tap.stop="clickLove(item)">
+												<image v-if="item.has_like" src="@/static/lover.png" class="micon" />
+												<image v-else src="@/static/love.png" class="micon" />
+												<text class="love-count" v-if="item.like_count>0">{{ item.like_count }}</text>
+											</view>
+										</view>
+									</view>
+								</navigator>
+							</view>
+						</template>
+					</sns-waterfall>
+					
 				</view>
 			</swiper-item>
 			<swiper-item class="swiper-item sns-news">
@@ -83,14 +114,21 @@
 </template>
 
 <script>
+	import snsWaterfall from '@/components/waterfall-sns/index.vue'
 	export default {
 		data() {
 			return {
 				swiperList: [], // 轮播图广告列表信息
 				currentSwiperIndex: 0, // 当前 推荐 咨询 滑动位置
 				feedsList: [], // 动态列表数据
-				newsList: [] // 资讯列表数据
+				newsList: [], // 资讯列表数据
+				swiperSliderHeight: '1000px', // 滑动基础高度
+				swiperSliderFeedsHeight: '0px',
+				swiperSliderNewsHeight: '0px'
 			}
+		},
+		components: {
+			snsWaterfall
 		},
 		filters: {
 			timeFormate(timeDate) {
@@ -118,8 +156,18 @@
 					url
 				})
 			},
-			// 推荐、资讯切换方法
+			// 推荐、资讯 滑动切换方法
+			swiperSlider (event) {
+				let index = event.detail.current
+				this.swiperChange(index)
+			},
+			// 推荐、资讯点击切换方法
 			swiperChange (index) {
+				if (index === 0) {
+					this.swiperSliderHeight = this.swiperSliderFeedsHeight
+				} else {
+					this.swiperSliderHeight = this.swiperSliderNewsHeight
+				}
 				this.currentSwiperIndex = index
 			},
 			// 获取动态信息
@@ -140,17 +188,22 @@
 						...item
 					}
 				})
-				console.log(feeds)
-				console.log(this.feedsList)
+				uni.$on('swiperHeightChange', height => {
+					console.log('触发了' + height)
+					this.swiperSliderFeedsHeight = height
+					this.swiperSliderHeight = height
+				})
 			},
 			// 获取资讯信息
 			async loadNews () {
 				let news = await this.$u.api.getNews()
 				this.newsList = news.data.map(item => {
 					return {
-						cover: this.BaseFileUrl + item.image.id
+						cover: this.BaseFileUrl + item.image.id,
+						...item
 					}
 				})
+				this.swiperSliderNewsHeight = (this.newsList.length * 95 + 100) + 'px'
 				console.log(this.newsList)
 			},
 		}
