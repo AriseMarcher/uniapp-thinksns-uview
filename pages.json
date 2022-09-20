@@ -11,7 +11,7 @@
 		 "path": "pages/feeds/feeds",
 			"style": {
 				"navigationBarTitleText": "动态中心",
-				"enablePullDownRefresh": false
+				"enablePullDownRefresh": true
 			}
 
 		}, {
