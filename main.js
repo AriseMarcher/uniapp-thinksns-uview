@@ -11,6 +11,9 @@ Vue.prototype.BaseFileUrl = 'http://ts.lagou.uieee.com/api/v2/files/'
 import uniNavBar from "@/components/uni-nav-bar/index";
 Vue.component("uni-nav-bar", uniNavBar);
 
+import login from "@/components/login/login"
+Vue.component("login", login);
+
 App.mpType = 'app'
 const app = new Vue({
     ...App
