@@ -1,5 +1,11 @@
 <template>
 	<view class="content">
+		<uni-nav-bar v-if="navBarShowTag">
+			<view class="tabs-box">
+				<view class="one-nav" :class="currentSwiperIndex === 0 ? 'nav-actived' : '' " @tap="swiperChange(0)">推荐</view>
+				<view class="one-nav" :class="currentSwiperIndex === 1 ? 'nav-actived' : '' " @tap="swiperChange(1)">资讯</view>
+			</view>
+		</uni-nav-bar>
 		<view class="header-box">
 			<swiper class="swiper" :indicator-dots="false" :autoplay="true" :interval="2500" :duration="500">
 				<swiper-item v-for="(item, index) in swiperList" :key="index">
@@ -32,6 +38,7 @@
 				<view class="one-nav" :class="currentSwiperIndex === 0 ? 'nav-actived' : '' " @tap="swiperChange(0)">推荐</view>
 				<view class="one-nav" :class="currentSwiperIndex === 1 ? 'nav-actived' : '' " @tap="swiperChange(1)">资讯</view>
 			</view>
+			
 		</view>
 		
 		<swiper
@@ -124,7 +131,10 @@
 				newsList: [], // 资讯列表数据
 				swiperSliderHeight: '1000px', // 滑动基础高度
 				swiperSliderFeedsHeight: '0px',
-				swiperSliderNewsHeight: '0px'
+				swiperSliderNewsHeight: '0px',
+				navBarShowTag: false, // NavBar 显示状态控制
+				oldFeedsScrollTop: 0, // 记录 推荐滚动 所在位置
+				oldNewsScrollTop: 0, // 记录 资讯滚动 所在位置
 			}
 		},
 		components: {
@@ -143,6 +153,18 @@
 			this.loadAdvertising()
 			this.loadFeeds()
 			this.loadNews()
+		},
+		onPageScroll(event) {
+			if (this.currentSwiperIndex === 0) {
+				this.oldFeedsScrollTop = event.scrollTop
+			} else {
+				this.oldNewsScrollTop = event.scrollTop
+			}
+			if (event.scrollTop > 220) {
+				this.navBarShowTag = true
+			} else {
+				this.navBarShowTag = false
+			}
 		},
 		methods: {
 			async loadAdvertising () {
@@ -168,6 +190,10 @@
 				} else {
 					this.swiperSliderHeight = this.swiperSliderNewsHeight
 				}
+				uni.pageScrollTo({
+					duration: 0,
+					scrollTop: index === 0 ? this.oldFeedsScrollTop : this.oldNewsScrollTop
+				})
 				this.currentSwiperIndex = index
 			},
 			// 获取动态信息

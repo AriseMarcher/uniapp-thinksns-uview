@@ -8,6 +8,9 @@ Vue.use(uView)
 // 设置文件访问基础地址信息
 Vue.prototype.BaseFileUrl = 'http://ts.lagou.uieee.com/api/v2/files/'
 
+import uniNavBar from "@/components/uni-nav-bar/index";
+Vue.component("uni-nav-bar", uniNavBar);
+
 App.mpType = 'app'
 const app = new Vue({
     ...App
