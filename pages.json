@@ -61,6 +61,20 @@
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},
+	"subPackages": [{
+		"root": "subpages",
+		"pages": [
+			{
+				"path": "feedinfo/feedinfo",
+				"style": {
+					"navigationBarTextStyle": "black",
+					"navigationBarTitleText": "动态详情",
+					"navigationBarBackgroundColor": "#F8F8F8",
+					"backgroundColor": "#F8F8F8"
+				}
+			}
+		]
+	}],
 	"uniIdRouter": {},
 	"easycom": {
 		"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
