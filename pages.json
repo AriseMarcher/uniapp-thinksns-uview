@@ -72,6 +72,12 @@
 					"navigationBarBackgroundColor": "#F8F8F8",
 					"backgroundColor": "#F8F8F8"
 				}
+			},
+			{
+				"path": "newinfo/newinfo",
+				"style": {
+					"navigationStyle": "custom"
+				}
 			}
 		]
 	}],
