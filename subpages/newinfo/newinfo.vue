@@ -38,6 +38,7 @@
 		</view>
 
 		<view class="line" />
+		<comment :oneInfo="newInfo" type="info" />
 	</view>
 </template>
 
@@ -47,6 +48,8 @@
 	import picBlur from '@/components/pic-blur/pic-blur.vue'
 	// 引入 时间日期格式化显示函数
 	// import timeFrom from '@/tools/timeFrom.js'
+	// 引入 评论插件
+	import comment from '@/components/comment/comment.vue'
 	export default {
 		data () {
 			return {
@@ -69,7 +72,8 @@
 		},
 		components: {
 			htmlParse,
-			picBlur
+			picBlur,
+			comment
 		},
 		onLoad (options) {
 			this.getNewInfo(options)

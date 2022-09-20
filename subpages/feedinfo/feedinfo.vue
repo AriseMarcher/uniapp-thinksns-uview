@@ -15,21 +15,25 @@
 			</view>
 		</view>
 		<view class="line" />
-		<comment :oneInfo="feedInfo" type="feed" />
+		<comment  :oneInfo="feedInfo" type="feed" />
 	</view>
 </template>
 
 <script>
+	import comment from '@/components/comment/comment.vue'
 	export default {
 		data() {
 			return {
 				feedInfo: {}
-			};
+			}
 		},
 		onLoad (params) {
 			this.getFeedsInfo({
 				id: params.id
 			})
+		},
+		components: {
+			comment
 		},
 		methods: {
 			async getFeedsInfo (params) {
@@ -38,7 +42,12 @@
 				let images = res.data.images.map(one => {
 					return this.BaseFileUrl + one.file
 				})
-				console.log(images)
+				this.feedInfo = {
+					...res.data,
+					name: res.data.user.name,
+					avatar: res.data.user.avatar ? res.data.user.avatar.url : '/static/nopic.png',
+					images,
+				}
 			}
 		}
 	}
