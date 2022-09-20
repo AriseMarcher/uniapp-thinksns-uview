@@ -37,7 +37,7 @@
 		methods: {
 			async getFeeds () {
 				let res = await this.$u.api.getFeeds()
-				if (res.data.feeds.length) {
+				if (res.data && res.data.feeds.length) {
 					let datas = res.data.feeds
 					let feeds = datas.map(item => {
 						let curCover = ''

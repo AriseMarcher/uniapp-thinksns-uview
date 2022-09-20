@@ -118,11 +118,14 @@
 			</swiper-item>
 		</swiper>
 		
-		<login ref="login" />
+		<login ref="login" v-if="!loginState" />
 	</view>
 </template>
 
 <script>
+	import {
+		mapState
+	} from 'vuex'
 	import snsWaterfall from '@/components/waterfall-sns/index.vue'
 	export default {
 		data() {
@@ -142,6 +145,9 @@
 		components: {
 			snsWaterfall
 		},
+		computed: {
+			...mapState(['loginState'])
+		},
 		filters: {
 			timeFormate(timeDate) {
 				// let Time = new Date(timeDate);
@@ -152,6 +158,38 @@
 			}
 		},
 		async onLoad() {
+			uni.$on('indexUserLogin', ()=>{
+				this.currentSwiperIndex = 0
+				this.feedsList = []
+				this.$refs.waterfall.clear()
+				this.getFeedsList()
+			})
+			uni.$on('indexUserLogout', ()=>{
+				this.currentSwiperIndex = 0
+				this.feedsList = []
+				this.$refs.waterfall.clear()
+				this.getFeedsList()
+			})
+			
+			// 发布新的动态后，触发数据更新
+			uni.$on("indexFeedsUpdate", ()=>{
+				this.currentSwiperIndex = 0
+				this.feedsList = []
+				this.$refs.waterfall.clear()
+				this.getFeedsList()
+			})
+			
+			// 个人中心删除一条动态后，触发更新首页数据
+			uni.$on("indexFeedRemove", fid =>{
+				this.$refs.waterfall.remove(fid);
+			})
+			
+			// 用户点赞一条动态后触发数据更新
+			uni.$on('indexFeedLoveChange', item => {
+				this.$refs.waterfall.modify(item.id, "like_count", item.like_count);
+				this.$refs.waterfall.modify(item.id, "has_like", item.has_like);
+			})
+						
 			this.loadAdvertising()
 			this.loadFeeds()
 			this.loadNews()

@@ -14,9 +14,14 @@ Vue.component("uni-nav-bar", uniNavBar);
 import login from "@/components/login/login"
 Vue.component("login", login);
 
+// 引入 store 
+import store from '@/store/index.js'
+Vue.prototype.$store = store
+
 App.mpType = 'app'
 const app = new Vue({
-    ...App
+    ...App,
+	store
 })
 
 // http拦截器，此为需要加入的内容，如果不是写在common目录，请自行修改引入路径

@@ -26,6 +26,9 @@ const install = (Vue, vm) => {
 	
 	// 请求拦截，配置Token等参数
 	Vue.prototype.$u.http.interceptor.request = (config) => {
+		const token = uni.getStorageSync("token");
+		config.header.Authorization = "Bearer " + token;
+		config.header.Accept = "application/json";
 		return config;
 	}
 	

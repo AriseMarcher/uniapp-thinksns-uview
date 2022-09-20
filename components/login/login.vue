@@ -63,8 +63,14 @@
 </template>
 
 <script>
+	import {
+		mapState,
+		mapActions
+	} from 'vuex'
+
 	export default {
 		name:"login",
+		...mapActions(['userLoginAction', 'userLogoutAction']),
 		data() {
 			return {
 				// 登陆组件是否显示
@@ -259,19 +265,27 @@
 		onReady() {
 			this.$refs.uForm.setRules(this.rules);
 		},
-		created() {
-			console.log('123')
+		async created() {
+			// 每次这个组件展开，我们就去判断一下当前 token 是否可以获取新的 token 如果可以获取，咱们就关闭登陆状态
+			let res = await this.$u.api.getUserMsg()
+			// 点赞消息数量
+			if (res.statusCode === 200) {
+				this.show = false
+				return
+			} else {
+				this.show = true
+			}
+			// #ifdef MP-WEIXIN
 			wx.getSetting({
 				success: res => {
 					if (res.authSetting["scope.userInfo"]) {
 						uni.getUserInfo({
 							success: res => {
 								// 如果用户授权了，则做两件事，第一件事
-								// this.form.login = res.userInfo.nickName
-								// this.form.name = res.userInfo.nickName
-								// this.form.avatar = res.userInfo.avatarUrl
+								this.form.login = res.userInfo.nickName
+								this.form.name = res.userInfo.nickName
+								this.form.avatar = res.userInfo.avatarUrl
 								this.getUserInfoTag = false
-								console.log(res)
 							},
 							fail: () => {
 								console.log('用户未授权！')
@@ -280,6 +294,7 @@
 					}
 				}
 			})
+			// #endif
 		},
 		methods: {
 			// 关闭弹窗
@@ -436,7 +451,44 @@
 							break;
 					}
 				});
+			},
+			// 注册、登陆成功后设置相关逻辑
+			async loginAfter(token) {
+				this.show = false
+				uni.setStorageSync('token', token)
 
+				// 获取未读消息提示
+				let res = await this.$u.api.getUserMsg()
+				let name = this.form.name
+				if (this.loginType === 'login') {
+					name = this.form.login
+				}
+				let loginInfo = {
+					name,
+					avatar: this.form.avatar,
+					liked: res.data.user.liked,
+					commented: res.data.user.commented
+				}
+				this.userLoginAction(loginInfo)
+				uni.$emit('meUserLogin')
+				uni.$emit('indexUserLogin')
+			},
+			// 获取验证码
+			async getCode() {
+				let pcode = await this.$u.api.getLoginCode({
+					phone: this.form.phone
+				})
+				if (!!pcode.data.message && pcode.data.message[0] === "获取成功") {
+					uni.showModal({
+						title: '验证码获取成功',
+						content: '8888'
+					})
+				} else {
+					uni.showModal({
+						title: '验证码获取失败',
+						content: pcode.data.errors.phone[0]
+					})
+				}
 			},
 		}
 	}
