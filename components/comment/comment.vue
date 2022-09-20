@@ -96,7 +96,7 @@
 				// 当前动态评论列表详情
 				commintsList: [],
 				// props 传递的数据无法改变触发 DOM 更新
-				oneInfoClone: [],
+				oneInfoClone: {},
 				// 是否展开评论弹窗
 				showCommentBox: false,
 				// 评论输入内容
@@ -107,6 +107,7 @@
 		},
 		watch: {
 			oneInfo(newVal) {
+				this.oneInfoClone = newVal
 				this.getCommentsList();
 			}
 		},
@@ -137,7 +138,32 @@
 					});
 					this.commintsList = res.data.comments;
 				}
-			}
+			},
+			// 获取输入内容
+			getInput(e) {
+			  this.cinput = e.detail.value;
+			  if(!this.cinput){
+				  this.disableSendCommentTag = true
+			  }else{
+				  this.disableSendCommentTag = false
+			  }
+			},
+			// 打开评论弹窗
+			openComment(){
+				this.showCommentBox = true
+			},
+			closeComment(){
+				this.showCommentBox = false
+			},
+			gotoComment(){
+				const query = uni.createSelectorQuery().in(this);
+				query.select('#gohere').boundingClientRect(data => {
+					uni.pageScrollTo({
+						duration:500,
+						scrollTop:data.top
+					})
+				}).exec(); 
+			},
 		}
 	};
 </script>
@@ -256,7 +282,7 @@
 			align-items: center;
 			align-content: center;
 			color: #ccc;
-			margin-right: 25upx;
+			// margin-right: 25upx;
 
 			.mbtn {
 				display: flex;
@@ -269,7 +295,7 @@
 				background-color: #fff;
 
 				&.mhare {
-					width: 150upx;
+					width: 180upx;
 				}
 			}
 
